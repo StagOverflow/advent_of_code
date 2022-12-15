@@ -9,9 +9,9 @@ class Command:
 
 class FileExplorer:
     def __init__(self):
-        self.current_dir = None
+        self.current_dir = '/'
         self.previous_dirs = []
-        self.dir_sizes = {}
+        self.dir_sizes = {'/': 0}
         self.dirs_to_backfill = {}
 
     def process(self, command: Command, output_buffer: list):
@@ -24,23 +24,22 @@ class FileExplorer:
         directory = directory[0]
 
         if directory == '..':
+            self.dir_sizes[self.previous_dirs[-1]] = self.dir_sizes[self.previous_dirs[-1]] + self.dir_sizes[self.current_dir]
             self.current_dir = self.previous_dirs[-1]
             self.previous_dirs.pop()
-        elif directory == '.':
-            pass
         elif directory == '/':
             self.current_dir = '/'
             self.previous_dirs = []
         else:
             self.previous_dirs.append(self.current_dir)
-            self.current_dir = directory
+            if self.previous_dirs[-1] == '/':
+                self.current_dir = self.previous_dirs[-1] + directory
+            else:
+                self.current_dir = self.previous_dirs[-1] + '/' + directory
 
     def _process_ls(self, output):
         dir_size = 0
         backfills = []
-
-        if self.current_dir == '/':
-            return 0
 
         for line in output:
             if re.search('^dir', line):
@@ -50,45 +49,50 @@ class FileExplorer:
 
         self.dir_sizes[self.current_dir] = dir_size
 
-        #  We need to come back to fill the size of the missing directories
-        #  but we'll have to walk the dict keys in reverse for that
-
-        for d in backfills:
-            if d in self.dirs_to_backfill:
-                self.dirs_to_backfill[d].append(self.current_dir)
-            else:
-                self.dirs_to_backfill[d] = [self.current_dir]
-
-    def backfill_sizes(self):
-        for dir_to_count in reversed(sorted(self.dirs_to_backfill.keys())):
-            for dir_missing_a_size in self.dirs_to_backfill[dir_to_count]:
-                self.dir_sizes[dir_missing_a_size] = self.dir_sizes[dir_to_count]
-
-    def total_directory_size(self, max_valid_size=10000):
+    def total_directory_size(self, max_valid_size=100000):
         total = 0
         for v in self.dir_sizes.values():
             total = total + v if v <= max_valid_size else total
 
         return total
 
+    def find_smallest_to_del(self, file_system_size=70000000, update_size=30000000):
+        sorted_dict = dict(sorted(self.dir_sizes.items(), key=lambda item: item[1]))
+        space_left = file_system_size - self.dir_sizes['/']
+        #
+        # if update_size < space_left:
+        #     return None
 
-def compute_size(input_path):
-    explorer = FileExplorer()
+        for k, v in sorted_dict.items():
+            if space_left + v >= update_size:
+                return k, v
+
+# need 24825975
+def compute_size(input_path, explorer: FileExplorer):
+    output_buffer = []
 
     with open(input_path) as terminal:
         current_command = 'start'
-        output_buffer = []
+
         for line in terminal:
             if current_command == 'start':
                 current_command = Command(line.strip().split(' '))
             elif line[0] == '$':
                 explorer.process(current_command, output_buffer)  # We have collected the full output for the previous command
                 current_command = Command(line.strip().split(' '))
+                output_buffer = []
             else:
                 output_buffer.append(line.strip())
-        explorer.backfill_sizes()
+
+        # We need to bring it back to the top at the very end
+        explorer.process(current_command, output_buffer)
+        while explorer.current_dir != '/':
+            explorer.process(Command(['$', 'cd', '..']), [])
 
     return explorer.total_directory_size()
 
 
-print(compute_size('sample.txt'))
+explorer = FileExplorer()
+print(compute_size('input.txt', explorer))
+#print(f"You should delete directory {explorer.find_smallest_to_del(file_system_size=3000, update_size=70)}")
+print(f"You should delete directory {explorer.find_smallest_to_del()}")

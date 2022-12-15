@@ -1,10 +1,21 @@
 $ cd /
 $ ls
-dir cmjgvh
+dir first_dir
 2561 hjsbd.mzp
-$ cd cmjgvh
+$ cd first_dir
 $ ls
-dir hdh
+dir another_dir
 165 hdh.sjv
-$ cd hdh
+dir pouik
+$ cd another_dir
+$ ls
 15 hdh.sjv
+dir baboum
+$ cd baboum
+$ ls
+45 sfs.txt
+$ cd ..
+$ cd ..
+$ cd pouik
+$ ls
+10 tt.xts
