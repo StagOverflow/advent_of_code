@@ -1,0 +1,10 @@
+$ cd /
+$ ls
+dir cmjgvh
+2561 hjsbd.mzp
+$ cd cmjgvh
+$ ls
+dir hdh
+165 hdh.sjv
+$ cd hdh
+15 hdh.sjv
