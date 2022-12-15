@@ -44,13 +44,50 @@ def inspect_rows(grid, reversed_order=False):
                 grid[row][col] = (tree_height, 'V')
     return grid
 
+
 def get_tree_scenic_score(grid, col, row):
-    top = row
+    top_limit = 1
+    bottom_limit = len(grid) - 1
+    right_limit = len(grid[0]) - 1
+    left_limit = 1
+
+    top_score = 1
+    bottom_score = 1
+    right_score = 1
+    left_score = 1
+
     tree_height = grid[row][col][0]
-    comparative_height = 0
 
-    while comparative_height <= tree_height:
+    if col == 3 and row == 3:
+        print("booom")
 
+    if col in (left_limit, right_limit - 1) or row in (top_limit, bottom_limit - 1):
+        return 0
+
+
+    current_row = row - 1
+    while current_row >= top_limit and tree_height > grid[current_row][col][0]:
+        current_row -= 1
+        top_score += 1
+
+    current_row = row + 1
+    while current_row < bottom_limit and tree_height > grid[current_row][col][0]:
+        current_row += 1
+        bottom_score += 1
+
+    current_row = row
+    current_col = col - 1
+    while current_col >= left_limit and tree_height > grid[row][current_col][0]:
+        current_col -= 1
+        left_score += 1
+
+    current_row = row
+    current_col = col + 1
+    while current_col < right_limit and tree_height > grid[current_row][current_col][0]:
+        current_col += 1
+        right_score += 1
+
+    return left_score * top_score * right_score * bottom_score
 
 
 def is_tree_visible(grid):
@@ -66,15 +103,27 @@ def count_visible_trees(grid):
             count = count+1 if tree[1] == 'V' else count
     return count
 
+def highest_scenic_score(grid):
+    top_score = 0
+
+    for row_i in range(len(grid)):
+        for col_i in range(len(grid)):
+            score = get_tree_scenic_score(grid, col_i, row_i)
+            top_score = score if score > top_score else top_score
+            print(f"{row_i},{col_i}:{grid[row_i][col_i]}|{score}")
+    return top_score
+
 def pretty_print(grid):
     for row in grid:
         print(row)
 
 
-g = parse_forest('input.txt')
+g = parse_forest('sample.txt')
 print("from file: ")
 pretty_print(g)
 g = is_tree_visible(g)
 print("visible trees: ")
 pretty_print(g)
 print(count_visible_trees(g))
+print("highest scenic score")
+print(highest_scenic_score(g))
