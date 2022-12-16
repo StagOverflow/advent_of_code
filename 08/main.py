@@ -33,8 +33,6 @@ def inspect_rows(grid, reversed_order=False):
         for col in col_range:
             tree_height = grid[row][col][0]
 
-            if tree_height == 4:
-                print(44444)
             if tree_height > tallest_in_col[col] or col in (0, num_cols - 1):
                 tallest_in_col[col] = tree_height
                 grid[row][col] = (tree_height, 'V')
@@ -58,12 +56,8 @@ def get_tree_scenic_score(grid, col, row):
 
     tree_height = grid[row][col][0]
 
-    if col == 3 and row == 3:
-        print("booom")
-
-    if col in (left_limit, right_limit - 1) or row in (top_limit, bottom_limit - 1):
+    if col in (0, len(grid[0]) - 1) or row in (0, len(grid) - 1):
         return 0
-
 
     current_row = row - 1
     while current_row >= top_limit and tree_height > grid[current_row][col][0]:
@@ -103,6 +97,7 @@ def count_visible_trees(grid):
             count = count+1 if tree[1] == 'V' else count
     return count
 
+
 def highest_scenic_score(grid):
     top_score = 0
 
@@ -110,16 +105,15 @@ def highest_scenic_score(grid):
         for col_i in range(len(grid)):
             score = get_tree_scenic_score(grid, col_i, row_i)
             top_score = score if score > top_score else top_score
-            print(f"{row_i},{col_i}:{grid[row_i][col_i]}|{score}")
     return top_score
+
 
 def pretty_print(grid):
     for row in grid:
         print(row)
 
 
-g = parse_forest('sample.txt')
-print("from file: ")
+g = parse_forest('input.txt')
 pretty_print(g)
 g = is_tree_visible(g)
 print("visible trees: ")
