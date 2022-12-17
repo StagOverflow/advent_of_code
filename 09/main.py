@@ -43,10 +43,6 @@ def move_head(head_position, direction: Direction):
 
 
 def move_tail(tail_position, head_position):
-    # TODO: right the head and tail would overlap, really we want the tail to only move one tile
-    # alternatively the tail could move to the spot of the head - 1 step in each direction, that
-    # one step however needs to maintain the direction (+ or -) of the motion
-
     def _move_lateral(tail, head):
         motion = head[1] - tail[1]
         return 0, motion - int(math.copysign(1, motion))  # The tail isn't moving the whole way to the head
@@ -59,7 +55,19 @@ def move_tail(tail_position, head_position):
         return tuple(map(lambda x, y: x + y, tuple_a, tuple_b))
 
     def _move_diagonal(tail, head):
-        return _add_tuples(_move_vertical(tail, head), _move_lateral(tail, head))
+        vertical_direction = head[0] - tail[0]
+        lateral_direction = head[1] - tail[1]
+
+        if vertical_direction >= 2:
+            vertical_direction -= 1
+        elif vertical_direction <= -2:
+            vertical_direction += 1
+        elif lateral_direction >= 2:
+            lateral_direction -= 1
+        else:
+            lateral_direction += 1
+
+        return vertical_direction, lateral_direction
 
     if tail_position == head_position:
         return tail_position
@@ -101,16 +109,17 @@ def track_tail_motion(input_path, grid_size=100):
             motions = HeadInput(line.strip())
             for _ in motions.steps:
                 head_position = move_head(head_position, motions.direction)
-                head_tracker.append(head_position)
+
                 if not head_tail_contact(tail_position, head_position):
                     tail_position = move_tail(tail_position, head_position)
-                    tail_tracker.append(tail_position)
 
+                head_tracker.append(head_position)
+                tail_tracker.append(tail_position)
     return tail_tracker, head_tracker
 
 
 tail_tracker, head_tracker = track_tail_motion('input.txt')
 
-# print(f"Head moves: {head_tracker}")
-# print(f"Tail moves: {tail_tracker}")
+print(f"Head moves: {head_tracker}")
+print(f"Tail moves: {tail_tracker}")
 print(f"Number of unique spots: {len(set(tail_tracker))}")
