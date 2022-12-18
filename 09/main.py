@@ -42,6 +42,10 @@ def move_head(head_position, direction: Direction):
         raise(Exception("Invalid direction input"))
 
 
+def _add_tuples(tuple_a: tuple, tuple_b: tuple):
+    return tuple(map(lambda x, y: x + y, tuple_a, tuple_b))
+
+
 def move_tail(tail_position, head_position):
     def _move_lateral(tail, head):
         motion = head[1] - tail[1]
@@ -50,9 +54,6 @@ def move_tail(tail_position, head_position):
     def _move_vertical(tail, head):
         motion = head[0] - tail[0]
         return motion - int(math.copysign(1, motion)), 0
-
-    def _add_tuples(tuple_a: tuple, tuple_b: tuple):
-        return tuple(map(lambda x, y: x + y, tuple_a, tuple_b))
 
     def _move_diagonal(tail, head):
         vertical_direction = head[0] - tail[0]
@@ -98,7 +99,26 @@ def head_tail_contact(tail_position, head_position):
     return head_to_tail_delta in [(1, 0), (0, 1), (1, 1), (0, 0)]
 
 
-def track_tail_motion(input_path, grid_size=100):
+def print_grid(head_position, tail_position, grid_size=30):
+
+    grid = [[0]*grid_size]*grid_size
+
+    for row_index in range(len(grid)):
+        row = f'{row_index-grid_size//2} '
+        if row[0] != '-':
+            row += ' '
+        for col in range(len(grid[row_index])):
+            if (row_index, col) == tuple(map(lambda x: x + grid_size//2, head_position)):
+                row = row + ' H '
+            elif (row_index, col) == tuple(map(lambda x: x + grid_size//2, tail_position)):
+                row = row + ' T '
+            else:
+                row = row + ' . '
+        print(row)
+    print('\n====================\n')
+
+
+def track_tail_motion(input_path, grid_size=100, verbose=False):
     head_position = (0, 0)
     tail_position = (0, 0)
     tail_tracker = []
@@ -118,7 +138,7 @@ def track_tail_motion(input_path, grid_size=100):
     return tail_tracker, head_tracker
 
 
-tail_tracker, head_tracker = track_tail_motion('input.txt')
+tail_tracker, head_tracker = track_tail_motion('sample.txt')
 
 print(f"Head moves: {head_tracker}")
 print(f"Tail moves: {tail_tracker}")
