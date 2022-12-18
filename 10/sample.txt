@@ -1,0 +1,5 @@
+addx 1
+noop
+addx 4
+noop
+noop
