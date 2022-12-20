@@ -1,5 +1,31 @@
+addx 9
+noop
+noop
+noop
+addx -1
+addx 2
+addx -37
+addx 1
+addx 3
+noop
+addx 15
+addx -21
+addx 22
+addx -6
 addx 1
 noop
-addx 4
+addx 2
+addx 1
+noop
+addx -10
+noop
+noop
+addx 20
+addx 1
+addx 2
+addx 2
+addx -6
+addx -11
+noop
 noop
 noop
