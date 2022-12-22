@@ -28,7 +28,7 @@ class Monkey:
 
             return operations[components[-2]](old_worry_level, right_hand_side)
 
-        return inspect
+        return map(lambda x: inspect(x), self.items)
 
     # Lucky us, all monkeys have the same worry check function :)
     def _throw_check(self, worry_level):
@@ -86,10 +86,10 @@ i = 0
 for ape in processed_monkeys:
     print(f"Monkey {i}:")
     print(ape)
-    print(ape.inspect(2))
+    print(list(ape.inspect))
     i += 1
 
 def play_keep_away(monkeys):
     for monkey in monkeys:
-        while monkey.items:
-            monkey
+        for item in monkey.inspect():
+            print(item)
