@@ -1,5 +1,6 @@
 import operator
 import re
+import functools
 
 
 class Monkey:
@@ -28,41 +29,42 @@ class Monkey:
             else:
                 raise Exception('Unrecognized worry level')
 
-            return operations[components[-2]](old_worry_level, right_hand_side) // 3
+            return operations[components[-2]](old_worry_level, right_hand_side)
 
         return inspect
 
 
     # Lucky us, all monkeys have the same worry check function :)
-
     def _throw_check(self, worry_level):
-        return (worry_level // self.divider) == 0
+        return (worry_level % self.divider) == 0
 
-    def inspect_and_throw_first(self):
-        print(f"Throwing item: {self.items[0]} ")
+    def inspect_and_throw_first(self, least_monkey_multiple,  verbose=False):
 
-        inspected_worry = self._inspect(self.items[0])
-        not_thrown_worry = inspected_worry // 3
+        original_worry = self.items[0]
+        inspected_worry = self._inspect(original_worry) % least_monkey_multiple
+        not_thrown_worry = inspected_worry
 
-        thrown_item = self.items.pop(0)
+        self.items.pop(0)
         selected_monkey = self.true_monkey if self._throw_check(not_thrown_worry) else self.false_monkey
-        selected_monkey.items.append(thrown_item)
+        selected_monkey.items.append(not_thrown_worry)
 
         self.inspected += 1
-        print(f"Item thrown to monkey {selected_monkey.id} with final worry level: {not_thrown_worry}")
-
+        if verbose:
+            print(f"Throwing item: {self.items[0]} ")
+            print(f"Thrown item: {original_worry} from Monkey {self.id} to monkey {selected_monkey.id} with final worry level: {not_thrown_worry}")
 
     def __str__(self):
         return f"""\nitems: {self.items}\n
-               divider: {self.divider}\n"""
+               divider: {self.divider}\n
+               id: {self.id}"""
 
 
 def get_numbers_from_string(items: str):
     return list(map(lambda x: int(x), re.findall(r'\b\d+\b', items)))
 
 
-def parse_monkey_activities(input_path):
-    monkeys = [Monkey() for _ in range(8)]
+def parse_monkey_activities(input_path, n=8):
+    monkeys = [Monkey() for _ in range(n)]
     monkey_num = 0
     current_monkey = monkeys[0]
 
@@ -74,7 +76,7 @@ def parse_monkey_activities(input_path):
                 monkey_num += 1
                 current_monkey = monkeys[monkey_num]
             elif words[0] == 'Monkey':
-                current_monkey.id = get_numbers_from_string(line)
+                current_monkey.id = get_numbers_from_string(line)[0]
             elif words[0] == 'Starting':
                 current_monkey.items = get_numbers_from_string(line)
             elif words[0] == 'Operation:':
@@ -91,32 +93,23 @@ def parse_monkey_activities(input_path):
     return monkeys
 
 
-processed_monkeys = parse_monkey_activities('input.txt')
-
-# i = 0
-
-# Monkey parsing is working
-# Monkey function is working
-# for ape in processed_monkeys:
-#     print(f"Monkey {i}:")
-#     print(ape)
-#     print(ape._inspect(23))
-#     i += 1
+processed_monkeys = parse_monkey_activities('input.txt', 8)
+least_monkey_multiple = functools.reduce(operator.mul, [monkey.divider for monkey in processed_monkeys])
 
 
-def play_keep_away(monkeys, rounds=20):
+def play_keep_away(monkeys, least_monkey_multiple, rounds=20, verbose=False):
     for r in range(rounds):
+        print(f"Round {r}: ")
         for monkey in monkeys:
-            for _ in monkey.items:
-                monkey.inspect_and_throw_first()
+            while monkey.items:
+                monkey.inspect_and_throw_first(least_monkey_multiple, verbose)
 
     ranking = [monkey.inspected for monkey in monkeys]
-    ranking.sort()
+    ranking.sort(reverse=True)
 
     return ranking[0] * ranking[1]
 
-processed_monkeys[0].inspected
 
-result = play_keep_away(processed_monkeys)
+result = play_keep_away(processed_monkeys,least_monkey_multiple, 10000)
 
 print(f"Monkey Business: {result}")
