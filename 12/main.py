@@ -39,7 +39,7 @@ def ingest_map(input_path):
         end = None
 
         for line in heatmap:
-            line.strip()
+            line = line.strip()
             grid_row = []
             col = -1
             for c in line:
@@ -100,6 +100,7 @@ def find_summit_path(grid, start, end):
 
         if end in reachable_points:
             if not shortest_path or steps < shortest_path:
+                 print('path')
                 shortest_path = steps
 
         # If this is a dead end, we need to backtrack, else we are moving forward
