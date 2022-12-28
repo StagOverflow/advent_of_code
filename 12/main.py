@@ -13,7 +13,7 @@ class Location:
             self.is_start = True
 
         elif Location.is_end(elevation):
-            self.elevation = ord('z')
+            self.elevation = ord('d')
             self.is_end = True
         else:
             self.elevation = ord(elevation)
@@ -75,13 +75,19 @@ def check_available_destinations(i, j, grid):
 
 
 def find_summit_path(grid, start, end):
+    print(f"Start: {start}")
+    print(f"End: {end}")
+
     to_visit = [start]
     steps = 0
     shortest_path = None
+    path = []
 
     while to_visit:
         current_location = to_visit[-1]
-        to_visit.pop()
+        print('current')
+        print(current_location)
+        path.append(to_visit.pop())
 
         unvisited_neighbors = []
 
@@ -99,17 +105,23 @@ def find_summit_path(grid, start, end):
                 to_visit.append(location)
 
         if end in reachable_points:
-            if not shortest_path or steps < shortest_path:
-                 print('path')
-                shortest_path = steps
+            if (not shortest_path) or (steps < shortest_path):
+                print(path)
+                for node in path:
+                    print(node)
+                shortest_path = steps + 1
 
         # If this is a dead end, we need to backtrack, else we are moving forward
-        steps = steps + 1 if unvisited_neighbors else steps - 1
+        if unvisited_neighbors:
+            steps = steps + 1
+        else:
+            steps - 1
+            path.pop()
 
     return shortest_path
 
 
-grid, start, end = ingest_map('input.txt')
+grid, start, end = ingest_map('sample.txt')
 print(find_summit_path(grid, start, end))
     # Create a stack of nodes to explore
     # Pop from stack when going back
