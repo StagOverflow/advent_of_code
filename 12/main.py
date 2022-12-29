@@ -13,7 +13,7 @@ class Location:
             self.is_start = True
 
         elif Location.is_end(elevation):
-            self.elevation = ord('d')
+            self.elevation = ord('z')
             self.is_end = True
         else:
             self.elevation = ord(elevation)
@@ -44,9 +44,6 @@ def ingest_map(input_path):
             col = -1
             for c in line:
                 col += 1
-                if c == 'S':
-                    print('bloup')
-
                 new_location = Location(row, col, c)
                 grid_row.append(new_location)
 
@@ -74,57 +71,59 @@ def check_available_destinations(i, j, grid):
     return available_directions
 
 
-def find_summit_path(grid, start, end):
+def reset_visited(grid):
+    for row in grid:
+        for tile in row:
+            tile.visited = False
+
+
+def find_summit_path(grid, end):
     print(f"Start: {start}")
     print(f"End: {end}")
 
-    to_visit = [start]
-    steps = 0
-    shortest_path = None
-    path = []
+    possible_trail_starts = []
 
-    while to_visit:
-        current_location = to_visit[-1]
-        print('current')
-        print(current_location)
-        path.append(to_visit.pop())
+    for row in grid:
+        for tile in row:
+            if tile.elevation == ord('a'):
+                possible_trail_starts.append(tile)
 
-        unvisited_neighbors = []
+    valid_paths = []
 
-        reachable_points = check_available_destinations(
-            current_location.row,
-            current_location.col,
-            grid)
+    for trail_start in possible_trail_starts:
+        available_paths = [[trail_start]]
+        selected_path = 0
+        reset_visited(grid)
 
-        if not current_location.visited:
-            current_location.visited = True
+        while selected_path < len(available_paths):
+            cur_path = available_paths[selected_path]
+            last_in_path = cur_path[-1]
 
-            unvisited_neighbors = list(filter(lambda x: not x.visited, reachable_points))
+            reachable_points = check_available_destinations(
+                last_in_path.row,
+                last_in_path.col,
+                grid)
 
-            for location in unvisited_neighbors:
-                to_visit.append(location)
+            if end in reachable_points:
+                cur_path.append(end)
+                valid_paths.append(cur_path)
+                break
 
-        if end in reachable_points:
-            if (not shortest_path) or (steps < shortest_path):
-                print(path)
-                for node in path:
-                    print(node)
-                shortest_path = steps + 1
+            for neighboring_tile in reachable_points:
+                if not neighboring_tile.visited:
+                    new_path = cur_path.copy()
+                    new_path.append(neighboring_tile)
+                    available_paths.append(new_path)
+                    neighboring_tile.visited = True
 
-        # If this is a dead end, we need to backtrack, else we are moving forward
-        if unvisited_neighbors:
-            steps = steps + 1
-        else:
-            steps - 1
-            path.pop()
+            selected_path += 1
 
-    return shortest_path
+    path_lengths = list(map(lambda x: len(x), valid_paths))
+    path_lengths.sort()
 
-
-grid, start, end = ingest_map('sample.txt')
-print(find_summit_path(grid, start, end))
-    # Create a stack of nodes to explore
-    # Pop from stack when going back
-    # Depth first search
+    return path_lengths
 
 
+
+grid, start, end = ingest_map('input.txt')
+print(find_summit_path(grid, end))
