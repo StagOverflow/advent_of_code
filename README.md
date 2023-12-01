@@ -1,5 +1,5 @@
-# Advent Of Code 2022
+# Advent Of Code
 
 :santa:	:evergreen_tree:	:santa:	:evergreen_tree:	:santa:
-Solutions to the [advent of code](https://adventofcode.com/) 2022 - 
+Solutions to the [advent of code](https://adventofcode.com/)
 :santa:	:evergreen_tree:	:santa:	:evergreen_tree:	:santa:
